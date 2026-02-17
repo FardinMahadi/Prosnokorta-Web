@@ -9,6 +9,21 @@ const api = axios.create({
     },
 });
 
+// Response interceptor to unwrap ApiResponse
+api.interceptors.response.use(
+    (response) => {
+        // If the response follows the ApiResponse format, unwrap the data
+        if (response.data && typeof response.data === 'object' && 'data' in response.data && 'success' in response.data) {
+            return {
+                ...response,
+                data: response.data.data
+            };
+        }
+        return response;
+    },
+    (error) => Promise.reject(error)
+);
+
 export * from './api/auth';
 export * from './api/admin';
 export * from './api/student';
