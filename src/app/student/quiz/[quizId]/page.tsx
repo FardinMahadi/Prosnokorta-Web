@@ -54,7 +54,10 @@ export default function QuizPage() {
         }
     }, [isSubmitting, quizId, answers, router, user, dispatch]);
 
-    const { formattedTime, isCritical } = useQuizTimer(quiz?.questions?.length || 0, handleSubmit);
+    const { formattedTime, isCritical } = useQuizTimer(
+        quiz && quiz.questions ? quiz.questions.length : 0, 
+        handleSubmit
+    );
 
     const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
 
@@ -62,14 +65,9 @@ export default function QuizPage() {
         try {
             const res = await studentApi.startQuiz(Number(quizId));
             const data = res.data;
-            const qCount = data.questions?.length || 0;
             
-            // Debug: Show if questions field exists and its type
-            if (!data.questions) {
-                const keys = Object.keys(data).join(', ');
-                toast.warning(`Questions missing! Keys: ${keys}`);
-            } else {
-                toast.info(`Loaded ${qCount} questions`);
+            if (!data.questions || data.questions.length === 0) {
+                toast.warning("This quiz has no questions yet.");
             }
             
             dispatch(setActiveQuiz(data));
