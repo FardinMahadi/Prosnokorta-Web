@@ -6,7 +6,7 @@ export function useQuizTimer(initialMinutes: number, onTimeUp: () => void) {
     const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
     useEffect(() => {
-        if (initialMinutes > 0) {
+        if (initialMinutes !== null && initialMinutes !== undefined) {
             setTimeLeft(initialMinutes * 60);
         }
     }, [initialMinutes]);

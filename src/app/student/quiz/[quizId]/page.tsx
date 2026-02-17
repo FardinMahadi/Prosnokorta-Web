@@ -24,6 +24,11 @@ export default function QuizPage() {
     const { user } = useAppSelector((state) => state.auth);
     const { activeQuiz: quiz, answers, isSubmitting } = useAppSelector((state) => state.quiz);
 
+    useEffect(() => {
+        // Clear previous quiz state on mount
+        dispatch(setActiveQuiz(null));
+    }, [dispatch]);
+
     const handleSubmit = useCallback(async () => {
         if (isSubmitting || !user) return;
         dispatch(setSubmitting(true));
@@ -56,9 +61,18 @@ export default function QuizPage() {
     const fetchQuiz = useCallback(async () => {
         try {
             const res = await studentApi.startQuiz(Number(quizId));
-            const questionsCount = res.data.questions?.length || 0;
-            toast.info(`Loaded ${questionsCount} questions`);
-            dispatch(setActiveQuiz(res.data));
+            const data = res.data;
+            const qCount = data.questions?.length || 0;
+            
+            // Debug: Show if questions field exists and its type
+            if (!data.questions) {
+                const keys = Object.keys(data).join(', ');
+                toast.warning(`Questions missing! Keys: ${keys}`);
+            } else {
+                toast.info(`Loaded ${qCount} questions`);
+            }
+            
+            dispatch(setActiveQuiz(data));
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 toast.error(error.response?.data?.message || 'Failed to start quiz');
