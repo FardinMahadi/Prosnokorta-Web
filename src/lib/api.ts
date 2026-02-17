@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://quizmaster-backend-t7pf.onrender.com/api/v1';
 
 const api = axios.create({
     baseURL: BASE_URL,
