@@ -25,7 +25,7 @@ export function CallToAction() {
               </Button>
             </Link>
             <Link href="/login">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10 px-10 rounded-full font-bold h-14 text-lg">
+              <Button size="lg" variant="outline" className="border-white text-black/50 hover:bg-white/10 px-10 rounded-full font-bold h-14 text-lg">
                 Student Login
               </Button>
             </Link>

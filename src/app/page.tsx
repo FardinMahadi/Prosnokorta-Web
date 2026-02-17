@@ -12,23 +12,13 @@ export default function LandingPage() {
     const router = useRouter();
     const { user, isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
 
-    useEffect(() => {
-        // Redirection is now handled by src/middleware.ts
-        console.log('LandingPage initialized', { isLoading, isAuthenticated, user });
-    }, [user, isAuthenticated, isLoading]);
-
     if (isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
             </div>
         );
-    }
-
-    // If authenticated and redirecting, show nothing or same loader
-    if (isAuthenticated) {
-        return null;
-    }
+    }    
 
     return (
         <div className="bg-gray-50 min-h-screen selection:bg-primary/10">

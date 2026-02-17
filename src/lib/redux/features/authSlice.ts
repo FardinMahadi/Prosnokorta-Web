@@ -27,8 +27,11 @@ export const authSlice = createSlice({
           const user = JSON.parse(saved);
           state.user = user;
           state.isAuthenticated = true;
+          // Ensure cookie is in sync for middleware
+          document.cookie = `user=${saved}; path=/; max-age=${7 * 24 * 60 * 60}`;
         } catch {
           localStorage.removeItem('user');
+          document.cookie = 'user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         }
       }
     },
