@@ -1,12 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from '@/lib/redux/features/authSlice';
-import quizReducer from '@/lib/redux/features/quizSlice';
+import authReducer from './slices/authSlice';
+import quizReducer from './slices/quizSlice';
 
 export const store = configureStore({
-  reducer: {
-    auth: authReducer,
-    quiz: quizReducer,
-  },
+    reducer: {
+        auth: authReducer,
+        quiz: quizReducer,
+    },
 });
 
 export type RootState = ReturnType<typeof store.getState>;

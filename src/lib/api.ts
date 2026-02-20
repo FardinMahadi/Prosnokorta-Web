@@ -1,31 +1,42 @@
 import axios from 'axios';
-
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://quizmaster-backend-t7pf.onrender.com/api/v1';
+import { ApiResponse } from '@/types';
 
 const api = axios.create({
-    baseURL: BASE_URL,
+    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api',
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
-// Response interceptor to unwrap ApiResponse
+// Request interceptor to add auth token
+api.interceptors.request.use((config) => {
+    if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+    }
+    return config;
+});
+
+// Response interceptor to unwrap data
 api.interceptors.response.use(
     (response) => {
-        // If the response follows the ApiResponse format, unwrap the data
-        if (response.data && typeof response.data === 'object' && 'data' in response.data && 'success' in response.data) {
-            return {
-                ...response,
-                data: response.data.data
-            };
+        const data = response.data as ApiResponse<any>;
+        if (data.success) {
+            return response;
         }
-        return response;
+        return Promise.reject(new Error(data.message || 'API Error'));
     },
-    (error) => Promise.reject(error)
+    (error) => {
+        if (error.response?.status === 401) {
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
+        }
+        return Promise.reject(error);
+    }
 );
-
-export * from './api/auth';
-export * from './api/admin';
-export * from './api/student';
 
 export default api;

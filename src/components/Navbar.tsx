@@ -1,115 +1,70 @@
 'use client';
 
-import { toast } from 'sonner';
-import { useState } from 'react';
-import { authApi } from '@/lib/api';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '@/lib/redux/store';
+import { logout } from '@/lib/redux/slices/authSlice';
 import { Button } from '@/components/ui/button';
-import { X, Menu, User, LogOut } from 'lucide-react';
-import { logout } from '@/lib/redux/features/authSlice';
-import { useAppDispatch, useAppSelector } from '@/lib/redux/hooks';
+import { useTheme } from 'next-themes';
+import { Sun, Moon, LogOut, BookOpen } from 'lucide-react';
 
 export default function Navbar() {
+    const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
+    const dispatch = useDispatch();
     const router = useRouter();
-    const dispatch = useAppDispatch();
-    const { user, isAuthenticated } = useAppSelector((state) => state.auth);
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const { theme, setTheme } = useTheme();
 
-    const handleLogout = async () => {
-        try {
-            await authApi.logout();
-            dispatch(logout());
-            toast.success('Logged out successfully');
-            router.push('/login');
-        } catch {
-            dispatch(logout());
-            router.push('/login');
-        }
+    const handleLogout = () => {
+        dispatch(logout());
+        router.push('/login');
     };
 
-    if (!isAuthenticated || !user) return null;
-
-    const navLinks = user.role === 'ADMIN' ? [
-        { label: 'Subjects', href: '/admin/dashboard' },
-        { label: 'Results', href: '/admin/results' },
-    ] : [
-        { label: 'Quizzes', href: '/student/dashboard' },
-        { label: 'My Results', href: '/student/results' },
-    ];
-
     return (
-        <nav className="border-b bg-white sticky top-0 z-50">
-            <div className="container mx-auto px-4 py-3">
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-8">
-                        <div className="font-bold text-xl cursor-pointer text-primary" onClick={() => router.push('/')}>
-                            Prosnokorta
-                        </div>
-                        {/* Desktop Links */}
-                        <div className="hidden md:flex gap-1">
-                            {navLinks.map(link => (
-                                <Button key={link.href} variant="ghost" onClick={() => router.push(link.href)}>
-                                    {link.label}
-                                </Button>
-                            ))}
-                        </div>
-                    </div>
+        <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+            <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+                <Link href="/" className="flex items-center space-x-2">
+                    <BookOpen className="h-6 w-6 text-primary" />
+                    <span className="text-xl font-bold bg-gradient-to-r from-primary to-teal-400 bg-clip-text text-transparent">
+                        Prosnokorta
+                    </span>
+                </Link>
 
-                    {/* Desktop User Info & Logout */}
-                    <div className="hidden md:flex items-center gap-4">
-                        <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-1.5 rounded-full border">
-                            <User size={14} />
-                            <span className="font-medium">{user.name}</span>
-                            <span className="text-[10px] bg-gray-200 px-1.5 py-0.5 rounded uppercase tracking-wider">{user.role}</span>
-                        </div>
-                        <Button variant="ghost" size="sm" onClick={handleLogout} className="text-red-600 hover:text-red-700 hover:bg-red-50">
-                            <LogOut size={16} className="mr-2" />
-                            Logout
-                        </Button>
-                    </div>
+                <div className="flex items-center gap-4">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                        title="Toggle theme"
+                    >
+                        <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                        <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                    </Button>
 
-                    {/* Mobile Menu Toggle */}
-                    <div className="md:hidden">
-                        <Button variant="ghost" size="icon" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                            {isMenuOpen ? <X /> : <Menu />}
-                        </Button>
-                    </div>
-                </div>
-
-                {/* Mobile Menu */}
-                {isMenuOpen && (
-                    <div className="md:hidden pt-4 pb-2 border-t mt-3 animate-in fade-in slide-in-from-top-2">
-                        <div className="flex flex-col gap-2">
-                            {navLinks.map(link => (
-                                <Button 
-                                    key={link.href} 
-                                    variant="ghost" 
-                                    className="justify-start w-full" 
-                                    onClick={() => {
-                                        router.push(link.href);
-                                        setIsMenuOpen(false);
-                                    }}
-                                >
-                                    {link.label}
-                                </Button>
-                            ))}
-                            <div className="border-t my-2 pt-2">
-                                <div className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 mb-2">
-                                    <User size={14} />
-                                    <span>{user.name} ({user.role})</span>
-                                </div>
-                                <Button 
-                                    variant="ghost" 
-                                    className="justify-start w-full text-red-600 hover:text-red-700 hover:bg-red-50" 
-                                    onClick={handleLogout}
-                                >
-                                    <LogOut size={16} className="mr-2" />
-                                    Logout
-                                </Button>
+                    {isAuthenticated && user ? (
+                        <div className="flex items-center gap-4">
+                            <div className="hidden md:flex flex-col items-end">
+                                <span className="text-sm font-medium">{user.name}</span>
+                                <span className="text-xs text-muted-foreground">{user.role}</span>
                             </div>
+                            <Button variant="outline" size="sm" onClick={() => router.push(user.role === 'ADMIN' ? '/admin/subjects' : '/student/dashboard')}>
+                                Dashboard
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-destructive">
+                                <LogOut className="h-4 w-4 mr-2" /> Logout
+                            </Button>
                         </div>
-                    </div>
-                )}
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            <Link href="/login">
+                                <Button variant="ghost" size="sm">Login</Button>
+                            </Link>
+                            <Link href="/register">
+                                <Button size="sm">Sign Up</Button>
+                            </Link>
+                        </div>
+                    )}
+                </div>
             </div>
         </nav>
     );

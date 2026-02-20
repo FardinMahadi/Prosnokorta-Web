@@ -1,9 +1,9 @@
-import "./globals.css";
-
 import type { Metadata } from "next";
-
-import { Toaster } from "@/components/ui/sonner";
 import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import ReduxProvider from "@/components/providers/ReduxProvider";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,12 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Prosnokorta",
-  description: "A modern platform for managing and taking quizzes.",
+  title: "Prosnokorta - Online Quiz Management System",
+  description: "A comprehensive platform for online quizzes and management.",
 };
-
-import Navbar from "@/components/Navbar";
-import ReduxProvider from "@/components/providers/ReduxProvider";
 
 export default function RootLayout({
   children,
@@ -29,15 +26,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        suppressHydrationWarning
       >
         <ReduxProvider>
-          <Navbar />
-          {children}
-          <Toaster />
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+            <Toaster richColors position="top-right" />
+          </ThemeProvider>
         </ReduxProvider>
       </body>
     </html>
