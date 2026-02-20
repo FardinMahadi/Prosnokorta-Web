@@ -1,108 +1,155 @@
 'use client';
 
-import type { Result } from '@/types';
-
-import axios from 'axios';
-import { toast } from 'sonner';
-import { adminApi } from '@/lib/api';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import Navbar from '@/components/Navbar';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardTitle,CardHeader, CardContent } from '@/components/ui/card';
-import { Table, TableRow, TableBody, TableCell, TableHead, TableHeader } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
+import { getAllResults } from '@/lib/api/quizzes';
+import { Result } from '@/types';
+import { toast } from 'sonner';
+import { Calendar, Search, User as UserIcon, BarChart3, Loader2, FileCheck } from 'lucide-react';
+import Link from 'next/link';
 
 export default function AdminResultsPage() {
-    const router = useRouter();
     const [results, setResults] = useState<Result[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
-        const fetchResults = async () => {
-            setIsLoading(true);
-            try {
-                const res = await adminApi.getAllResults();
-                setResults(res.data);
-            } catch (error) {
-                if (axios.isAxiosError(error)) {
-                    toast.error(error.response?.data?.message || 'Failed to fetch all results');
-                } else {
-                    toast.error('An unexpected error occurred');
-                }
-            } finally {
-                setIsLoading(false);
-            }
-        };
         fetchResults();
     }, []);
 
+    const fetchResults = async () => {
+        try {
+            const data = await getAllResults();
+            setResults(data || []);
+        } catch (error) {
+            toast.error("Failed to fetch results.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const filteredResults = results.filter(r => 
+        r.studentName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        r.quizTitle.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const averagePercentage = results.length > 0 
+        ? Math.round(results.reduce((acc, r) => acc + (r.score / r.totalMarks), 0) / results.length * 100)
+        : 0;
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex flex-col">
+                <Navbar />
+                <div className="flex-grow flex items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="min-h-screen bg-gray-50">
-            <main className="container mx-auto px-4 py-8">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold">Quiz Results</h1>
-                    <p className="text-gray-600">Monitor student performance across all quizzes</p>
+        <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <main className="flex-grow container mx-auto px-4 py-8">
+                <header className="mb-8">
+                    <h1 className="text-3xl font-bold">System Analytics & Results</h1>
+                    <p className="text-muted-foreground">Monitor student performance across all quizzes.</p>
+                </header>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">Total Submissions</CardTitle>
+                            <FileCheck className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{results.length}</div>
+                            <p className="text-xs text-muted-foreground">Across all subjects</p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">Average Score</CardTitle>
+                            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{averagePercentage}%</div>
+                            <p className="text-xs text-muted-foreground">System-wide average</p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">Active Students</CardTitle>
+                            <UserIcon className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {new Set(results.map(r => r.studentName)).size}
+                            </div>
+                            <p className="text-xs text-muted-foreground">Unique participants</p>
+                        </CardContent>
+                    </Card>
                 </div>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>All Student Attempts</CardTitle>
-                    </CardHeader>
-                        <CardContent className="p-0 sm:p-6">
-                            <div className="overflow-x-auto">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Student Name</TableHead>
-                                            <TableHead>Quiz Title</TableHead>
-                                            <TableHead className="hidden sm:table-cell">Score</TableHead>
-                                            <TableHead>Percentage</TableHead>
-                                            <TableHead className="hidden md:table-cell">Date</TableHead>
-                                            <TableHead className="text-right">Actions</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {isLoading ? (
-                                            Array.from({ length: 5 }).map((_, i) => (
-                                                <TableRow key={i}>
-                                                    <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                                                    <TableCell><Skeleton className="h-5 w-48" /></TableCell>
-                                                    <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-16" /></TableCell>
-                                                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-                                                    <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
-                                                    <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
-                                                </TableRow>
-                                            ))
-                                        ) : results.length > 0 ? (
-                                            results.map((result) => {
-                                                const percentage = (result.score / result.totalMarks) * 100;
-                                                return (
-                                                    <TableRow key={result.id}>
-                                                        <TableCell className="font-medium">{result.studentName}</TableCell>
-                                                        <TableCell>{result.quizTitle}</TableCell>
-                                                        <TableCell className="hidden sm:table-cell">{result.score} / {result.totalMarks}</TableCell>
-                                                        <TableCell>{percentage.toFixed(1)}%</TableCell>
-                                                        <TableCell className="hidden md:table-cell">{new Date(result.submittedAt).toLocaleDateString()}</TableCell>
-                                                        <TableCell className="text-right">
-                                                            <Button size="sm" variant="ghost" onClick={() => router.push(`/student/results/${result.id}`)}>
-                                                                View Details
-                                                            </Button>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                );
-                                            })
-                                        ) : (
-                                            <TableRow>
-                                                <TableCell colSpan={6} className="text-center py-8 text-gray-500">
-                                                    No quiz submissions found.
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </CardContent>
-                </Card>
+                <div className="relative mb-6">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                        placeholder="Search by student name or quiz title..." 
+                        className="pl-10"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+
+                <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead className="bg-muted/50 border-b">
+                                <tr>
+                                    <th className="px-6 py-4 text-sm font-semibold">Student</th>
+                                    <th className="px-6 py-4 text-sm font-semibold">Quiz</th>
+                                    <th className="px-6 py-4 text-sm font-semibold">Score</th>
+                                    <th className="px-6 py-4 text-sm font-semibold">Percentage</th>
+                                    <th className="px-6 py-4 text-sm font-semibold">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y">
+                                {filteredResults.map((result) => (
+                                    <tr key={result.id} className="hover:bg-muted/30 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <div className="font-medium">{result.studentName}</div>
+                                        </td>
+                                        <td className="px-6 py-4">{result.quizTitle}</td>
+                                        <td className="px-6 py-4 font-mono font-medium">
+                                            {result.score} / {result.totalMarks}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                                                (result.score / result.totalMarks) >= 0.8 ? 'bg-green-100 text-green-700' :
+                                                (result.score / result.totalMarks) >= 0.5 ? 'bg-yellow-100 text-yellow-700' :
+                                                'bg-red-100 text-red-700'
+                                            }`}>
+                                                {Math.round((result.score / result.totalMarks) * 100)}%
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-sm text-muted-foreground">
+                                            {new Date(result.submittedAt).toLocaleDateString()}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    {filteredResults.length === 0 && (
+                        <div className="text-center py-12">
+                            <p className="text-muted-foreground">No results found matching your criteria.</p>
+                        </div>
+                    )}
+                </div>
             </main>
         </div>
     );

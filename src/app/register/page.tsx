@@ -1,97 +1,145 @@
 'use client';
 
-import axios from 'axios';
-import { toast } from 'sonner';
 import { useState } from 'react';
-import { authApi } from '@/lib/api';
 import { useRouter } from 'next/navigation';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { useDispatch } from 'react-redux';
+import { register } from '@/lib/api/auth';
 import { Button } from '@/components/ui/button';
-import { useAppDispatch } from '@/lib/redux/hooks';
-import { setUser } from '@/lib/redux/features/authSlice';
-import { Card, CardTitle, CardFooter, CardHeader,CardContent, CardDescription } from '@/components/ui/card';
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
+import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
+
+const formSchema = z.object({
+    name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+    email: z.string().email({ message: "Invalid email address." }),
+    password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+    confirmPassword: z.string().min(6),
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+});
 
 export default function RegisterPage() {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
-    const dispatch = useAppDispatch();
 
-    const handleRegister = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            name: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+        },
+    });
+
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        setIsLoading(true);
         try {
-            const res = await authApi.register({ name, email, password });
-            const user = res.data;
-            dispatch(setUser(user));
-            toast.success('Registration Successful!');
-            router.push('/');
-        } catch (error) {
-            if (axios.isAxiosError(error)) {
-                toast.error(error.response?.data?.message || 'Registration failed');
-            } else {
-                toast.error('An unexpected error occurred');
-            }
+            await register({
+                name: values.name,
+                email: values.email,
+                password: values.password,
+            });
+            toast.success("Account created successfully! Please login.");
+            router.push('/login');
+        } catch (error: any) {
+            toast.error(error.message || "Registration failed. Please try again.");
         } finally {
-            setLoading(false);
+            setIsLoading(false);
         }
-    };
+    }
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
-            <Card className="w-full max-w-sm shadow-lg">
+        <div className="flex items-center justify-center min-h-screen bg-background p-4">
+            <Card className="w-full max-w-md">
                 <CardHeader>
-                    <CardTitle className="text-2xl">Register</CardTitle>
-                    <CardDescription>Create a new account to start taking quizzes.</CardDescription>
+                    <CardTitle className="text-2xl font-bold text-center">Create an Account</CardTitle>
+                    <CardDescription className="text-center">Join Prosnokorta to start taking or creating quizzes.</CardDescription>
                 </CardHeader>
-                <form onSubmit={handleRegister}>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Full Name</Label>
-                            <Input 
-                                id="name" 
-                                type="text" 
-                                placeholder="John Doe" 
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                required 
+                <CardContent>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                            <FormField
+                                control={form.control}
+                                name="name"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Full Name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="John Doe" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input 
-                                id="email" 
-                                type="email" 
-                                placeholder="m@example.com" 
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required 
+                            <FormField
+                                control={form.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Email</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="email@example.com" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input 
-                                id="password" 
-                                type="password" 
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required 
+                            <FormField
+                                control={form.control}
+                                name="password"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Password</FormLabel>
+                                        <FormControl>
+                                            <Input type="password" placeholder="••••••••" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
-                        </div>
-                    </CardContent>
-                    <CardFooter className="flex flex-col gap-4">
-                        <Button type="submit" className="w-full" disabled={loading}>
-                            {loading ? 'Creating account...' : 'Register'}
-                        </Button>
-                        <p className="text-sm text-center">
-                            Already have an account?{' '}
-                            <Button variant="link" onClick={() => router.push('/login')}>Login</Button>
-                        </p>
-                    </CardFooter>
-                </form>
+                            <FormField
+                                control={form.control}
+                                name="confirmPassword"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Confirm Password</FormLabel>
+                                        <FormControl>
+                                            <Input type="password" placeholder="••••••••" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <Button type="submit" className="w-full" disabled={isLoading}>
+                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Register
+                            </Button>
+                        </form>
+                    </Form>
+                </CardContent>
+                <CardFooter className="flex flex-col space-y-2">
+                    <p className="text-sm text-center text-muted-foreground">
+                        Already have an account?{" "}
+                        <Link href="/login" className="text-primary hover:underline">
+                            Login
+                        </Link>
+                    </p>
+                </CardFooter>
             </Card>
         </div>
     );
