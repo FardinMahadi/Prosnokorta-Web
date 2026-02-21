@@ -1,15 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import type { Result } from '@/types';
+
+import Link from 'next/link';
+import { toast } from 'sonner';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import { Award, XCircle, Loader2, ArrowLeft, CheckCircle2 } from 'lucide-react';
+
 import Navbar from '@/components/Navbar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getStudentResults } from '@/lib/api/quizzes';
-import { Result } from '@/types';
-import { toast } from 'sonner';
-import { CheckCircle2, XCircle, Loader2, Award, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import { Card, CardTitle, CardHeader, CardContent, CardDescription } from '@/components/ui/card';
 
 export default function ResultDetailPage() {
     const { id } = useParams();
@@ -22,7 +24,7 @@ export default function ResultDetailPage() {
                 const allResults = await getStudentResults();
                 const currentResult = allResults.find(r => r.id === Number(id));
                 setResult(currentResult || null);
-            } catch (error: any) {
+            } catch {
                 toast.error("Failed to fetch result details.");
             } finally {
                 setIsLoading(false);

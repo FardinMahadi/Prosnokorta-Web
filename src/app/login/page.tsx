@@ -1,27 +1,28 @@
 'use client';
 
+import * as z from 'zod';
+import Link from 'next/link';
+import { toast } from 'sonner';
 import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { useDispatch } from 'react-redux';
-import { setCredentials } from '@/lib/redux/slices/authSlice';
+
 import { login } from '@/lib/api/auth';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { setCredentials } from '@/lib/redux/slices/authSlice';
+import { Card, CardTitle, CardFooter, CardHeader, CardContent, CardDescription } from '@/components/ui/card';
 import {
     Form,
-    FormControl,
-    FormField,
     FormItem,
+    FormField,
     FormLabel,
+    FormControl,
     FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
-import Link from 'next/link';
-import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
     email: z.string().email({ message: "Invalid email address." }),
@@ -47,14 +48,14 @@ export default function LoginPage() {
             const data = await login(values);
             dispatch(setCredentials(data));
             toast.success("Logged in successfully!");
-            
+
             if (data.user.role === 'ADMIN') {
                 router.push('/admin/subjects');
             } else {
                 router.push('/student/dashboard');
             }
-        } catch (error: any) {
-            toast.error(error.message || "Login failed. Please try again.");
+        } catch (error: unknown) {
+            toast.error(error instanceof Error ? error.message : "Login failed. Please try again.");
         } finally {
             setIsLoading(false);
         }

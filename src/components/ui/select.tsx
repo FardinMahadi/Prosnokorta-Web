@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 import { Select as SelectPrimitive } from "radix-ui"
+import { CheckIcon, ChevronUpIcon, ChevronDownIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -178,13 +178,13 @@ function SelectScrollDownButton({
 
 export {
   Select,
-  SelectContent,
-  SelectGroup,
   SelectItem,
+  SelectGroup,
   SelectLabel,
-  SelectScrollDownButton,
-  SelectScrollUpButton,
-  SelectSeparator,
-  SelectTrigger,
   SelectValue,
+  SelectContent,
+  SelectTrigger,
+  SelectSeparator,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
 }

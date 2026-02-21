@@ -1,7 +1,8 @@
+import Link from "next/link";
+import { Shield, ArrowRight, Smartphone, CheckCircle } from "lucide-react";
+
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { ArrowRight, CheckCircle, Smartphone, Globe, Shield } from "lucide-react";
 
 export default function Home() {
   return (

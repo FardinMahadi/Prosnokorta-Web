@@ -1,16 +1,18 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Navbar from '@/components/Navbar';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { getQuizById, submitQuiz } from '@/lib/api/quizzes';
-import { Quiz, QuizSubmission } from '@/types';
+import type { Quiz, QuizSubmission } from '@/types';
+
 import { toast } from 'sonner';
-import { Clock, Loader2, Send } from 'lucide-react';
+import { Send, Clock, Loader2 } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+
+import Navbar from '@/components/Navbar';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { submitQuiz, getQuizById } from '@/lib/api/quizzes';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Card, CardTitle, CardHeader, CardContent } from '@/components/ui/card';
 
 export default function QuizTakingPage() {
     const { id } = useParams();
@@ -37,7 +39,7 @@ export default function QuizTakingPage() {
             const result = await submitQuiz(submission);
             toast.success(autoSubmit ? "Time up! Quiz submitted automatically." : "Quiz submitted successfully!");
             router.push(`/student/results/${result.id}`);
-        } catch (error: any) {
+        } catch {
             toast.error("Failed to submit quiz.");
             setIsSubmitting(false);
         }
@@ -49,7 +51,7 @@ export default function QuizTakingPage() {
                 const data = await getQuizById(Number(id));
                 setQuiz(data);
                 if (data) setTimeLeft(data.durationMinutes * 60);
-            } catch (error: any) {
+            } catch {
                 toast.error("Failed to fetch quiz details.");
                 router.push('/student/dashboard');
             } finally {
@@ -63,7 +65,7 @@ export default function QuizTakingPage() {
     useEffect(() => {
         if (timeLeft <= 0 && !isLoading && quiz) {
             handleSubmit(true);
-            return;
+            return () => { };
         }
 
         const timer = setInterval(() => {

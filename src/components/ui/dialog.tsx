@@ -147,12 +147,12 @@ function DialogDescription({
 export {
   Dialog,
   DialogClose,
-  DialogContent,
-  DialogDescription,
+  DialogTitle,
   DialogFooter,
   DialogHeader,
-  DialogOverlay,
   DialogPortal,
-  DialogTitle,
+  DialogContent,
+  DialogOverlay,
   DialogTrigger,
+  DialogDescription,
 }

@@ -1,13 +1,15 @@
 'use client';
 
+import type { RootState } from '@/lib/redux/store';
+
 import Link from 'next/link';
+import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/lib/redux/store';
-import { logout } from '@/lib/redux/slices/authSlice';
-import { Button } from '@/components/ui/button';
-import { useTheme } from 'next-themes';
 import { Sun, Moon, LogOut, BookOpen } from 'lucide-react';
+
+import { Button } from '@/components/ui/button';
+import { logout } from '@/lib/redux/slices/authSlice';
 
 export default function Navbar() {
     const { user, isAuthenticated } = useSelector((state: RootState) => state.auth);
