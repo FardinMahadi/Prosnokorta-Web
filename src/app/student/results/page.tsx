@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import type { Result } from '@/types';
+
+import Link from 'next/link';
+import { toast } from 'sonner';
+import { useState, useEffect } from 'react';
+import { Trophy, Loader2, Calendar, FileCheck, ChevronRight } from 'lucide-react';
+
 import Navbar from '@/components/Navbar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getStudentResults } from '@/lib/api/quizzes';
-import { Result } from '@/types';
-import { toast } from 'sonner';
-import { Calendar, ChevronRight, FileCheck, Loader2, Trophy } from 'lucide-react';
-import Link from 'next/link';
 
 export default function StudentResultsPage() {
     const [results, setResults] = useState<Result[]>([]);
@@ -19,7 +21,7 @@ export default function StudentResultsPage() {
             try {
                 const data = await getStudentResults();
                 setResults(data || []);
-            } catch (error: any) {
+            } catch {
                 toast.error("Failed to fetch results.");
             } finally {
                 setIsLoading(false);

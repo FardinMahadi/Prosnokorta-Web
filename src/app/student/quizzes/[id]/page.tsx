@@ -1,15 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import type { Quiz } from '@/types';
+
+import Link from 'next/link';
+import { toast } from 'sonner';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import { Play, Clock, Loader2, FileText } from 'lucide-react';
+
 import Navbar from '@/components/Navbar';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getQuizzesBySubject } from '@/lib/api/quizzes';
-import { Quiz } from '@/types';
-import { toast } from 'sonner';
-import { Clock, FileText, Loader2, Play } from 'lucide-react';
-import Link from 'next/link';
+import { Card, CardTitle, CardFooter, CardHeader, CardContent, CardDescription } from '@/components/ui/card';
 
 export default function QuizListPage() {
     const { id } = useParams();
@@ -21,7 +23,7 @@ export default function QuizListPage() {
             try {
                 const data = await getQuizzesBySubject(Number(id));
                 setQuizzes(data || []);
-            } catch (error: any) {
+            } catch {
                 toast.error("Failed to fetch quizzes.");
             } finally {
                 setIsLoading(false);

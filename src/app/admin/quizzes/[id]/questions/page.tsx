@@ -1,37 +1,39 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Navbar from '@/components/Navbar';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { getQuizById, addQuestion, deleteQuestion } from '@/lib/api/quizzes';
-import { Quiz, Question } from '@/types';
+import type { Quiz } from '@/types';
+
+import * as z from 'zod';
 import { toast } from 'sonner';
-import { Loader2, Plus, Trash2, ArrowLeft, HelpCircle } from 'lucide-react';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react'; // Added useCallback
+import { Plus, Trash2, Loader2, ArrowLeft, HelpCircle } from 'lucide-react';
+
+import Navbar from '@/components/Navbar';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { getQuizById, addQuestion, deleteQuestion } from '@/lib/api/quizzes';
+import { Card, CardTitle, CardHeader, CardContent } from '@/components/ui/card';
+import {
+    Form,
+    FormItem,
+    FormField,
+    FormLabel,
+    FormControl,
+    FormMessage,
+} from "@/components/ui/form";
+import {
+    Dialog,
+    DialogTitle,
+    DialogFooter,
+    DialogHeader,
+    DialogContent,
+    DialogTrigger,
+    DialogDescription,
+} from "@/components/ui/dialog";
 
 const questionSchema = z.object({
     text: z.string().min(5, { message: "Question text must be at least 5 characters." }),
@@ -63,21 +65,22 @@ export default function AdminQuestionsPage() {
         },
     });
 
-    useEffect(() => {
-        if (id) fetchQuiz();
-    }, [id]);
-
-    const fetchQuiz = async () => {
+    // Wrapped in useCallback to prevent unnecessary re-renders and fix lint warnings
+    const fetchQuiz = useCallback(async () => {
         try {
             const data = await getQuizById(Number(id));
             setQuiz(data);
-        } catch (error) {
+        } catch {
             toast.error("Failed to fetch quiz details.");
             router.push('/admin/quizzes');
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [id, router]);
+
+    useEffect(() => {
+        if (id) fetchQuiz();
+    }, [id, fetchQuiz]);
 
     const onSubmit = async (values: z.infer<typeof questionSchema>) => {
         const payload = {
@@ -93,7 +96,7 @@ export default function AdminQuestionsPage() {
             setIsDialogOpen(false);
             fetchQuiz();
             form.reset();
-        } catch (error) {
+        } catch {
             toast.error("Failed to add question.");
         }
     };
@@ -104,7 +107,7 @@ export default function AdminQuestionsPage() {
             await deleteQuestion(Number(id), questionId);
             toast.success("Question deleted successfully!");
             fetchQuiz();
-        } catch (error) {
+        } catch {
             toast.error("Failed to delete question.");
         }
     };
@@ -168,14 +171,14 @@ export default function AdminQuestionsPage() {
                                             <div key={num} className="flex items-center space-x-2">
                                                 <FormField
                                                     control={form.control}
-                                                    name={`option${num}` as any}
+                                                    name={`option${num}` as "option1" | "option2" | "option3" | "option4"}
                                                     render={({ field }) => (
                                                         <FormItem className="flex-grow">
                                                             <div className="flex items-center gap-2">
                                                                 <FormControl>
                                                                     <Input placeholder={`Option ${num}`} {...field} />
                                                                 </FormControl>
-                                                                <Checkbox 
+                                                                <Checkbox
                                                                     checked={form.watch('correctAnswer') === field.value && field.value !== ""}
                                                                     onCheckedChange={() => form.setValue('correctAnswer', field.value)}
                                                                 />
@@ -194,7 +197,11 @@ export default function AdminQuestionsPage() {
                                             <FormItem>
                                                 <FormLabel>Marks</FormLabel>
                                                 <FormControl>
-                                                    <Input type="number" {...field} />
+                                                    <Input
+                                                        type="number"
+                                                        {...field}
+                                                        onChange={(e) => field.onChange(Number(e.target.value))}
+                                                    />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -235,8 +242,8 @@ export default function AdminQuestionsPage() {
                                 <CardContent>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                         {question.options.map((option, optIndex) => (
-                                            <div 
-                                                key={optIndex} 
+                                            <div
+                                                key={optIndex}
                                                 className={`p-3 rounded-lg border ${option === question.correctAnswer ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-900/30' : 'bg-muted/30'}`}
                                             >
                                                 <span className="text-sm">{option}</span>

@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Navbar from '@/components/Navbar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { getResultsByQuiz, getQuizById } from '@/lib/api/quizzes';
-import { Result, Quiz } from '@/types';
+import type { Quiz, Result } from '@/types';
+
 import { toast } from 'sonner';
-import { ArrowLeft, Loader2, FileText, TrendingUp, Users, Award } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { Users, Award, Loader2, FileText, ArrowLeft, TrendingUp } from 'lucide-react';
+
+import Navbar from '@/components/Navbar';
+import { Button } from '@/components/ui/button';
+import { getQuizById, getResultsByQuiz } from '@/lib/api/quizzes';
+import { Card, CardTitle, CardHeader, CardContent } from '@/components/ui/card';
 
 export default function QuizResultsPage() {
     const { id } = useParams();
@@ -26,7 +28,7 @@ export default function QuizResultsPage() {
                 ]);
                 setResults(resultsData || []);
                 setQuiz(quizData);
-            } catch (error) {
+            } catch {
                 toast.error("Failed to fetch quiz results.");
             } finally {
                 setIsLoading(false);

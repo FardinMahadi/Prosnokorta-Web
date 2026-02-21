@@ -1,5 +1,6 @@
+import type { Quiz, Result, ApiResponse, QuizSubmission, Question } from '@/types';
+
 import api from '../api';
-import { Quiz, ApiResponse, QuizSubmission, Result } from '@/types';
 
 export const getQuizzesBySubject = async (subjectId: number) => {
     const response = await api.get<ApiResponse<Quiz[]>>(`/quizzes/subject/${subjectId}`);
@@ -35,8 +36,8 @@ export const deleteQuiz = async (id: number) => {
     await api.delete(`/quizzes/${id}`);
 };
 
-export const addQuestion = async (quizId: number, data: any) => {
-    const response = await api.post<ApiResponse<any>>(`/quizzes/${quizId}/questions`, data);
+export const addQuestion = async (quizId: number, data: Partial<Question>) => {
+    const response = await api.post<ApiResponse<Question>>(`/quizzes/${quizId}/questions`, data);
     return response.data.data;
 };
 

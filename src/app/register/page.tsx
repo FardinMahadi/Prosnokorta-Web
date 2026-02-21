@@ -1,26 +1,26 @@
 'use client';
 
+import * as z from 'zod';
+import Link from 'next/link';
+import { toast } from 'sonner';
 import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { useDispatch } from 'react-redux';
+
 import { register } from '@/lib/api/auth';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Card, CardTitle, CardFooter, CardHeader, CardContent, CardDescription } from '@/components/ui/card';
 import {
     Form,
-    FormControl,
-    FormField,
     FormItem,
+    FormField,
     FormLabel,
+    FormControl,
     FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
-import Link from 'next/link';
-import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
     name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -56,8 +56,9 @@ export default function RegisterPage() {
             });
             toast.success("Account created successfully! Please login.");
             router.push('/login');
-        } catch (error: any) {
-            toast.error(error.message || "Registration failed. Please try again.");
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Registration failed. Please try again.";
+            toast.error(message);
         } finally {
             setIsLoading(false);
         }

@@ -1,0 +1,15 @@
+# Build & Dependencies
+node_modules
+.next
+dist
+build
+.agents
+
+# Generated Files (from your scripts)
+src/utils/*.ts
+src/api/*.ts
+
+# Assets
+public
+*.svg
+*.ico

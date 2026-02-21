@@ -1,5 +1,6 @@
+import type { ApiResponse } from '@/types';
+
 import axios from 'axios';
-import { ApiResponse } from '@/types';
 
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api',
@@ -22,7 +23,7 @@ api.interceptors.request.use((config) => {
 // Response interceptor to unwrap data
 api.interceptors.response.use(
     (response) => {
-        const data = response.data as ApiResponse<any>;
+        const data = response.data as ApiResponse<unknown>;
         if (data.success) {
             return response;
         }

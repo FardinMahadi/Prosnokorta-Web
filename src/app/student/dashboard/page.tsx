@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import type { Subject } from '@/types';
+
+import Link from 'next/link';
+import { toast } from 'sonner';
+import { useState, useEffect } from 'react';
+import { Book, Loader2, ChevronRight } from 'lucide-react';
+
 import Navbar from '@/components/Navbar';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getEnrolledSubjects } from '@/lib/api/subjects';
-import { Subject } from '@/types';
-import { toast } from 'sonner';
-import { Book, ChevronRight, Loader2 } from 'lucide-react';
-import Link from 'next/link';
+import { Card, CardTitle, CardFooter, CardHeader, CardContent, CardDescription } from '@/components/ui/card';
 
 export default function StudentDashboard() {
     const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -19,7 +21,7 @@ export default function StudentDashboard() {
             try {
                 const data = await getEnrolledSubjects();
                 setSubjects(data || []);
-            } catch (error: any) {
+            } catch {
                 toast.error("Failed to fetch subjects.");
             } finally {
                 setIsLoading(false);

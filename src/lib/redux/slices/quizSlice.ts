@@ -1,5 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Quiz, Subject } from '@/types';
+import type { Quiz, Subject } from '@/types';
+import type { PayloadAction } from '@reduxjs/toolkit';
+
+import { createSlice } from '@reduxjs/toolkit';
 
 interface QuizState {
     subjects: Subject[];

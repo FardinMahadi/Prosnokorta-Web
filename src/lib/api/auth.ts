@@ -1,5 +1,6 @@
+import type { User, ApiResponse, LoginRequest, RegisterRequest } from '@/types';
+
 import api from '../api';
-import { LoginRequest, RegisterRequest, User, ApiResponse } from '@/types';
 
 export const login = async (data: LoginRequest) => {
     const response = await api.post<ApiResponse<{ user: User; token: string }>>(
