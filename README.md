@@ -79,6 +79,13 @@ NEXT_PUBLIC_API_URL=https://quizmaster-backend-t7pf.onrender.com/api/v1
 3. **Open Browser**:
    Visit [http://localhost:3000](http://localhost:3000) to view the application.
 
+4. **Test Credentials**:
+   Use the following accounts for testing:
+   - **Admin**: `admin@quiz.com` / `admin123`
+   - **Admin**: `mahadifardin@quiz.com` / `admin123`
+   - **Student**: `student@quiz.com` / `student123`
+   - **Student**: `fardin@quiz.com` / `student123`
+
 ---
 
 ## 🔗 Related Repositories
