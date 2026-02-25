@@ -5,6 +5,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import ReduxProvider from "@/components/providers/ReduxProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import AuthInitializer from "@/components/providers/AuthInitializer";
 
 import "./globals.css";
 
@@ -34,15 +35,17 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ReduxProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-            <Toaster richColors position="top-right" />
-          </ThemeProvider>
+          <AuthInitializer>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+              <Toaster richColors position="top-right" />
+            </ThemeProvider>
+          </AuthInitializer>
         </ReduxProvider>
       </body>
     </html>

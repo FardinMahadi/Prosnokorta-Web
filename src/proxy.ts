@@ -17,7 +17,7 @@ export function proxy(request: NextRequest) {
     // Redirect to dashboard if accessing auth routes with token
     if (authRoutes.some((route) => pathname.startsWith(route)) && token) {
         // Ideally we'd check the role here, but we'd need to decode the token or have a role cookie
-        return NextResponse.redirect(new URL('/', request.url));
+        return NextResponse.redirect(new URL('/student/dashboard', request.url));
     }
 
     return NextResponse.next();

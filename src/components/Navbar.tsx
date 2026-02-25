@@ -44,16 +44,22 @@ export default function Navbar() {
                     </Button>
 
                     {isAuthenticated && user ? (
-                        <div className="flex items-center gap-4">
-                            <div className="hidden md:flex flex-col items-end">
-                                <span className="text-sm font-medium">{user.name}</span>
-                                <span className="text-xs text-muted-foreground">{user.role}</span>
+                        <div className="flex items-center gap-2 md:gap-4">
+                            <div className="flex flex-col items-end">
+                                <span className="text-sm font-medium leading-none">{user.name}</span>
+                                <span className="text-[10px] md:text-xs text-muted-foreground">{user.role}</span>
                             </div>
-                            <Button variant="outline" size="sm" onClick={() => router.push(user.role === 'ADMIN' ? '/admin/subjects' : '/student/dashboard')}>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => router.push(user.role === 'ADMIN' ? '/admin/subjects' : '/student/dashboard')}
+                                className="hidden sm:inline-flex"
+                            >
                                 Dashboard
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-destructive">
-                                <LogOut className="h-4 w-4 mr-2" /> Logout
+                            <Button variant="ghost" size="sm" onClick={handleLogout} className="text-destructive px-2 md:px-3">
+                                <LogOut className="h-4 w-4 md:mr-2" />
+                                <span className="hidden md:inline">Logout</span>
                             </Button>
                         </div>
                     ) : (
