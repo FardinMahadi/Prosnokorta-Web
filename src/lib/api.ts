@@ -27,9 +27,28 @@ api.interceptors.response.use(
         if (data.success) {
             return response;
         }
+
+        // Log API error from successful response with success: false
+        console.error('[API Error Success Context]:', {
+            url: response.config.url,
+            method: response.config.method,
+            message: data.message,
+            data: data.data
+        });
+
         return Promise.reject(new Error(data.message || 'API Error'));
     },
     (error) => {
+        // Log Axios/Network error
+        console.error('[API Error Network Context]:', {
+            url: error.config?.url,
+            method: error.config?.method,
+            status: error.response?.status,
+            statusText: error.response?.statusText,
+            message: error.message,
+            responseData: error.response?.data
+        });
+
         if (error.response?.status === 401) {
             if (typeof window !== 'undefined') {
                 localStorage.removeItem('token');

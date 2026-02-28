@@ -12,7 +12,7 @@ interface AuthState {
 
 const initialState: AuthState = {
     user: null,
-    token: typeof window !== 'undefined' ? Cookies.get('token') || null : null,
+    token: null,
     isAuthenticated: false,
 };
 
@@ -41,8 +41,13 @@ const authSlice = createSlice({
             state.user = action.payload;
             state.isAuthenticated = true;
         },
+        initializeToken: (state) => {
+            if (typeof window !== 'undefined') {
+                state.token = Cookies.get('token') || null;
+            }
+        },
     },
 });
 
-export const { setCredentials, logout, setUser } = authSlice.actions;
+export const { setCredentials, logout, setUser, initializeToken } = authSlice.actions;
 export default authSlice.reducer;
