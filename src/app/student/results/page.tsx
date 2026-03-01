@@ -1,9 +1,11 @@
 'use client';
 
 import type { Result } from '@/types';
+import type { RootState } from '@/lib/redux/store';
 
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { Trophy, Loader2, Calendar, FileCheck, ChevronRight } from 'lucide-react';
 
@@ -13,13 +15,15 @@ import { Button } from '@/components/ui/button';
 import { getStudentResults } from '@/lib/api/quizzes';
 
 export default function StudentResultsPage() {
+    const { user } = useSelector((state: RootState) => state.auth);
     const [results, setResults] = useState<Result[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchResults = async () => {
+            if (!user) return;
             try {
-                const data = await getStudentResults();
+                const data = await getStudentResults(user.id);
                 setResults(data || []);
             } catch {
                 toast.error("Failed to fetch results.");
@@ -28,8 +32,8 @@ export default function StudentResultsPage() {
             }
         };
 
-        fetchResults();
-    }, []);
+        if (user) fetchResults();
+    }, [user]);
 
     if (isLoading) {
         return (

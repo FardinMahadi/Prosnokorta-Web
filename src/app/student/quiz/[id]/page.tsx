@@ -1,8 +1,10 @@
 'use client';
 
+import type { RootState } from '@/lib/redux/store';
 import type { Quiz, QuizSubmission } from '@/types';
 
 import { toast } from 'sonner';
+import { useSelector } from 'react-redux';
 import { Send, Clock, Loader2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
@@ -17,6 +19,7 @@ import { Card, CardTitle, CardHeader, CardContent } from '@/components/ui/card';
 export default function QuizTakingPage() {
     const { id } = useParams();
     const router = useRouter();
+    const { user } = useSelector((state: RootState) => state.auth);
     const [quiz, setQuiz] = useState<Quiz | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,7 +27,7 @@ export default function QuizTakingPage() {
     const [timeLeft, setTimeLeft] = useState<number>(0);
 
     const handleSubmit = useCallback(async (autoSubmit = false) => {
-        if (!quiz || isSubmitting) return;
+        if (!quiz || isSubmitting || !user) return;
 
         setIsSubmitting(true);
         const submission: QuizSubmission = {
@@ -36,14 +39,14 @@ export default function QuizTakingPage() {
         };
 
         try {
-            const result = await submitQuiz(submission);
+            const result = await submitQuiz(submission, user.id);
             toast.success(autoSubmit ? "Time up! Quiz submitted automatically." : "Quiz submitted successfully!");
             router.push(`/student/results/${result.id}`);
         } catch {
             toast.error("Failed to submit quiz.");
             setIsSubmitting(false);
         }
-    }, [quiz, answers, isSubmitting, router]);
+    }, [quiz, answers, isSubmitting, router, user]);
 
     useEffect(() => {
         const fetchQuiz = async () => {

@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { getCurrentUser } from '@/lib/api/auth';
-import { setUser, logout } from '@/lib/redux/slices/authSlice';
+import { setUser, logout, initializeToken } from '@/lib/redux/slices/authSlice';
 
 export default function AuthInitializer({
     children,
@@ -19,6 +19,7 @@ export default function AuthInitializer({
 
     useEffect(() => {
         const initializeAuth = async () => {
+            dispatch(initializeToken());
             const token = Cookies.get('token');
 
             if (token && !user) {

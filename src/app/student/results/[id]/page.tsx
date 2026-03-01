@@ -1,9 +1,11 @@
 'use client';
 
 import type { Result } from '@/types';
+import type { RootState } from '@/lib/redux/store';
 
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { Award, XCircle, Loader2, ArrowLeft, CheckCircle2 } from 'lucide-react';
@@ -15,13 +17,15 @@ import { Card, CardTitle, CardHeader, CardContent, CardDescription } from '@/com
 
 export default function ResultDetailPage() {
     const { id } = useParams();
+    const { user } = useSelector((state: RootState) => state.auth);
     const [result, setResult] = useState<Result | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchResult = async () => {
+            if (!user) return;
             try {
-                const allResults = await getStudentResults();
+                const allResults = await getStudentResults(user.id);
                 const currentResult = allResults.find(r => r.id === Number(id));
                 setResult(currentResult || null);
             } catch {
@@ -31,8 +35,8 @@ export default function ResultDetailPage() {
             }
         };
 
-        if (id) fetchResult();
-    }, [id]);
+        if (id && user) fetchResult();
+    }, [id, user]);
 
     if (isLoading) {
         return (
